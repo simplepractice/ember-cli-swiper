@@ -249,6 +249,7 @@ export default Component.extend({
      Trigger `update()` of swiper
      */
     if (this.get('updateFor') !== this.get('_updateForInternal')) {
+      debugger
       once(this.get('_swiper'), 'update');
       this.set('_updateForInternal', this.get('updateFor'));
     }

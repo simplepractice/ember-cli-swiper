@@ -5,7 +5,7 @@ const Funnel = require('broccoli-funnel'); // eslint-disable-line node/no-extran
 const MergeTrees = require('broccoli-merge-trees'); // eslint-disable-line node/no-extraneous-require
 
 module.exports = {
-  name: 'ember-cli-swiper',
+  name: require('./package').name,
 
   treeForVendor(defaultTree) {
     let trees = [];

@@ -31,7 +31,7 @@ module('Integration | Component | swiper container', function(hooks) {
 
     this.set('noSwiping', expected);
     await render(
-      hbs`{{swiper-container noSwiping=noSwiping registerAs=componentInstanceAttr}}`
+      hbs`{{swiper-container noSwiping=this.noSwiping registerAs=this.componentInstanceAttr}}`
     );
 
     assert.strictEqual(
@@ -42,7 +42,7 @@ module('Integration | Component | swiper container', function(hooks) {
 
     this.set('options', { noSwiping: expected });
     await render(
-      hbs`{{swiper-container options=options registerAs=componentInstanceOpts}}`
+      hbs`{{swiper-container options=this.options registerAs=this.componentInstanceOpts}}`
     );
 
     assert.strictEqual(
@@ -58,7 +58,7 @@ module('Integration | Component | swiper container', function(hooks) {
     this.set('effect', expected);
     this.set('options', { effect: 'cube' });
     await render(
-      hbs`{{swiper-container effect=effect options=options registerAs=componentInstanceAttr}}`
+      hbs`{{swiper-container effect=this.effect options=this.options registerAs=this.componentInstanceAttr}}`
     );
 
     assert.strictEqual(
@@ -143,24 +143,23 @@ module('Integration | Component | swiper container', function(hooks) {
   });
 
   test('it destroys the Swiper instance when component element destroyed', async function(assert) {
-    assert.expect(2);
     this.set('componentInstance', null);
     this.set('active', true);
 
     await render(
-      hbs`{{#if active}}{{swiper-container registerAs=componentInstance}}{{/if}}`
+      hbs`{{#if active}}{{swiper-container registerAs=this.componentInstance}}{{/if}}`
     );
+    let componentInstance = this.get('componentInstance');
+    assert.ok(componentInstance._swiper, 'Swiper intantiated');
 
+    sinon
+      .stub(componentInstance._swiper, 'destroy')
+      .callsFake(() => assert.ok(true, 'destroy was called'))
+      .callThrough();
+
+    this.set('active', false);
     run(() => {
-      let componentInstance = this.get('componentInstance');
-      assert.ok(componentInstance._swiper, 'Swiper intantiated');
 
-      sinon
-        .stub(componentInstance._swiper, 'destroy')
-        .callsFake(() => assert.ok(true, 'destroy was called'))
-        .callThrough();
-
-      this.set('active', false);
     });
   });
 
@@ -169,7 +168,7 @@ module('Integration | Component | swiper container', function(hooks) {
     this.set('rendered', true);
 
     await render(
-      hbs`{{#if rendered}}{{swiper-container registerAs=componentInstance}}{{/if}}`
+      hbs`{{#if rendered}}{{swiper-container registerAs=this.componentInstance}}{{/if}}`
     );
 
     let componentInstance = this.get('componentInstance');
@@ -219,7 +218,7 @@ module('Integration | Component | swiper container', function(hooks) {
     this.set('currentSlide', 0);
 
     await render(hbs`
-      {{#swiper-container currentSlide=currentSlide}}
+      {{#swiper-container currentSlide=this.currentSlide}}
         {{swiper-slide}}
         {{swiper-slide}}
       {{/swiper-container}}`);
@@ -237,23 +236,21 @@ module('Integration | Component | swiper container', function(hooks) {
   test('it triggers `swiper.update()` when `updateFor` is updated', async function(assert) {
     this.set('updateFor', '');
     await render(hbs`
-      {{swiper-container updateFor=updateFor registerAs=componentInstance}}`);
+      {{swiper-container updateFor=this.updateFor registerAs=this.componentInstance}}`);
 
     let componentInstance = this.get('componentInstance');
-
-    sinon
-      .stub(componentInstance._swiper, 'update')
-      .callsFake(() => assert.ok(true, 'called swiper.update'))
-      .callThrough();
+    let spyUpdate = sinon.spy(componentInstance._swiper, 'update');
 
     this.set('updateFor', 'updateTranslate');
+
+    assert.ok(spyUpdate.calledOnce);
   });
 
   test('it updates the `currentSlide` when viewing and removing the last item', async function(assert) {
     this.set('itemList', ['item-1', 'item-2']);
 
     await render(hbs`
-      {{#swiper-container 
+      {{#swiper-container
         navigation=true
         updateFor=itemList
         currentSlide=currentSlide
@@ -287,10 +284,11 @@ module('Integration | Component | swiper container', function(hooks) {
     this.actions.onInit = () => assert.ok(true, 'invoked init handler');
 
     await render(hbs`
-      {{swiper-container registerAs=componentInstance events=(hash init=(action "onInit"))}}`);
+      {{swiper-container registerAs=this.componentInstance events=(hash init=(action "onInit"))}}`);
   });
 
   test('it triggers `autoplay` with custom `currentSlide`', async function(assert) {
+    const done = assert.async();
     let run = false;
 
     this.actions.onAutoplay = () => {
@@ -304,6 +302,7 @@ module('Integration | Component | swiper container', function(hooks) {
         lastSlide && lastSlide.classList.contains('swiper-slide-active'),
         'set slide at index 2 to active'
       );
+      done();
 
       run = true;
     };
@@ -377,7 +376,7 @@ module('Integration | Component | swiper container', function(hooks) {
     this.set('componentInstance', null);
 
     await render(
-      hbs`{{swiper-container registerAs=componentInstance updateFor=updateForValue}}`
+      hbs`{{swiper-container registerAs=this.componentInstance updateFor=this.updateForValue}}`
     );
 
     let swiperInstance = this.get('componentInstance._swiper');

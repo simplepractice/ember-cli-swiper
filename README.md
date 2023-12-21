@@ -4,6 +4,15 @@ Simple ember-wrapper around [Swiper by idangerous](https://idangero.us/swiper/de
 
 See the [demo](https://ember-swiper.github.io/ember-cli-swiper/) for examples and usage-infos.
 
+
+Compatibility
+------------------------------------------------------------------------------
+
+* Ember.js v3.24 or above
+* Ember CLI v3.24 or above
+* Node.js v12 or above
+
+
 Installation
 ------------------------------------------------------------------------------
 
